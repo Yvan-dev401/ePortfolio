@@ -322,10 +322,211 @@
     @media (prefers-reduced-motion: reduce) {
       .cursor, .footer-note .blip { animation: none; }
     }
+
+    /* ════════════════════════════════════════
+       PORTE D'ACCÈS (paywall simulé)
+       ════════════════════════════════════════ */
+    body.locked { overflow: hidden; }
+    #portfolio.hidden { display: none; }
+
+    .gate {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: var(--bg);
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      overflow-y: auto;
+      padding: 48px 20px;
+      transition: opacity 0.4s ease;
+    }
+    .gate.closing { opacity: 0; pointer-events: none; }
+
+    .gate-card {
+      width: 100%;
+      max-width: 460px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 32px 28px 36px;
+      margin: auto;
+    }
+
+    .gate-topbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 28px;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+    .gate-topbar .topbar-label {
+      margin-left: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+    }
+
+    .gate-title {
+      font-size: clamp(20px, 4vw, 26px);
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      margin-bottom: 8px;
+    }
+    .gate-title .lock { color: var(--accent); }
+    .gate-sub {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.03em;
+      line-height: 1.6;
+      margin-bottom: 26px;
+    }
+
+    .field { margin-bottom: 16px; }
+    .field-label {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 7px;
+    }
+    .field input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      letter-spacing: 0.04em;
+      padding: 11px 13px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field input::placeholder { color: var(--dim); letter-spacing: 0.02em; }
+    .field input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    .field-row { display: flex; gap: 12px; }
+    .field-row .field { flex: 1; }
+
+    .amount-field input {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+    .amount-hint {
+      font-size: 11px;
+      color: var(--dim);
+      letter-spacing: 0.05em;
+      margin-top: 6px;
+    }
+
+    .gate-error {
+      display: none;
+      font-size: 12px;
+      color: #FF5F57;
+      letter-spacing: 0.03em;
+      margin: 4px 0 16px;
+      line-height: 1.5;
+    }
+    .gate-error.show { display: block; }
+
+    .gate-btn {
+      width: 100%;
+      background: var(--accent);
+      color: var(--btn-fill);
+      border: 1px solid var(--accent);
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 13px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .gate-btn:hover { transform: translateY(-2px); box-shadow: 0 0 18px var(--shadow-accent); }
+    .gate-btn:active { transform: translateY(0); }
+
+    .gate-note {
+      font-size: 10.5px;
+      color: var(--dim);
+      letter-spacing: 0.04em;
+      line-height: 1.6;
+      margin-top: 18px;
+      text-align: center;
+    }
   </style>
 </head>
-<body>
-<main class="terminal">
+<body class="locked">
+
+<!-- ════ PORTE D'ACCÈS (paywall simulé — vérification côté client) ════ -->
+<div class="gate" id="gate">
+  <div class="gate-card">
+
+    <div class="gate-topbar">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
+      <span class="topbar-label">accès sécurisé — paiement</span>
+    </div>
+
+    <div class="gate-title"><span class="lock">🔒</span> Accès au portfolio</div>
+    <div class="gate-sub">
+      L'accès à ce portfolio est réservé aux visiteurs ayant réglé le montant.
+      Renseignez vos coordonnées bancaires puis validez le paiement pour continuer.
+    </div>
+
+    <form id="gateForm" novalidate>
+      <div class="field">
+        <label class="field-label" for="cardName">Nom du titulaire</label>
+        <input type="text" id="cardName" placeholder="VELOMORA DIVNO YVAN" autocomplete="cc-name" />
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="cardNumber">Numéro de carte</label>
+        <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000" inputmode="numeric" autocomplete="cc-number" maxlength="23" />
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label" for="cardExp">Expiration</label>
+          <input type="text" id="cardExp" placeholder="MM/AA" inputmode="numeric" autocomplete="cc-exp" maxlength="5" />
+        </div>
+        <div class="field">
+          <label class="field-label" for="cardCvv">CVV</label>
+          <input type="text" id="cardCvv" placeholder="123" inputmode="numeric" autocomplete="cc-csc" maxlength="4" />
+        </div>
+      </div>
+
+      <div class="field amount-field">
+        <label class="field-label" for="amount">Montant à payer</label>
+        <input type="text" id="amount" placeholder="Entrez le montant (Ar)" inputmode="numeric" autocomplete="off" />
+        <div class="amount-hint">// Devise : Ariary (Ar)</div>
+      </div>
+
+      <div class="gate-error" id="gateError"></div>
+
+      <button type="submit" class="gate-btn">Payer &amp; accéder</button>
+
+      <div class="gate-note">
+        🔐 Démonstration — aucune donnée bancaire n'est envoyée ni enregistrée.<br>
+        La vérification est effectuée localement dans votre navigateur.
+      </div>
+    </form>
+
+  </div>
+</div>
+
+<main class="terminal hidden" id="portfolio">
 
   <!-- Top bar -->
   <div class="topbar">
@@ -484,6 +685,79 @@
 </main>
 
 <script>
+  /* ════════════════════════════════════════
+     PORTE D'ACCÈS — vérification du montant
+     Seul 500 000 Ar débloque le portfolio.
+     ════════════════════════════════════════ */
+  (function () {
+    const REQUIRED_AMOUNT = 500000; // 500 000 Ar
+    const gate      = document.getElementById('gate');
+    const form      = document.getElementById('gateForm');
+    const amountEl  = document.getElementById('amount');
+    const errorEl   = document.getElementById('gateError');
+    const portfolio = document.getElementById('portfolio');
+
+    // Formatage automatique du numéro de carte : groupes de 4 chiffres
+    const cardNumber = document.getElementById('cardNumber');
+    cardNumber.addEventListener('input', () => {
+      const digits = cardNumber.value.replace(/\D/g, '').slice(0, 16);
+      cardNumber.value = digits.replace(/(.{4})/g, '$1 ').trim();
+    });
+
+    // Formatage automatique de la date d'expiration : MM/AA
+    const cardExp = document.getElementById('cardExp');
+    cardExp.addEventListener('input', () => {
+      let d = cardExp.value.replace(/\D/g, '').slice(0, 4);
+      if (d.length >= 3) d = d.slice(0, 2) + '/' + d.slice(2);
+      cardExp.value = d;
+    });
+
+    // CVV : chiffres uniquement
+    const cardCvv = document.getElementById('cardCvv');
+    cardCvv.addEventListener('input', () => {
+      cardCvv.value = cardCvv.value.replace(/\D/g, '').slice(0, 4);
+    });
+
+    function unlock() {
+      gate.classList.add('closing');
+      document.body.classList.remove('locked');
+      portfolio.classList.remove('hidden');
+      sessionStorage.setItem('accessGranted', '1');
+      setTimeout(() => { gate.remove(); }, 450);
+    }
+
+    function showError(msg) {
+      errorEl.textContent = msg;
+      errorEl.classList.add('show');
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      // On ne garde que les chiffres saisis dans le champ montant.
+      // Accepte « 500000 », « 500 000 », « 500.000 », « 500,000 Ar », etc.
+      const raw = amountEl.value.replace(/[^\d]/g, '');
+      const amount = parseInt(raw, 10);
+
+      if (!raw) {
+        showError('⚠ Veuillez saisir le montant à payer.');
+        return;
+      }
+      if (amount === REQUIRED_AMOUNT) {
+        errorEl.classList.remove('show');
+        unlock();
+      } else {
+        showError('⚠ Montant incorrect. Le montant exact requis pour accéder au portfolio est de 500 000 Ar.');
+      }
+    });
+
+    // Si l'accès a déjà été accordé dans cette session, on ouvre directement.
+    if (sessionStorage.getItem('accessGranted') === '1') {
+      document.body.classList.remove('locked');
+      portfolio.classList.remove('hidden');
+      gate.remove();
+    }
+  })();
+
   /* ── Theme toggle ── */
   const html = document.documentElement;
   const btn  = document.getElementById('themeBtn');
